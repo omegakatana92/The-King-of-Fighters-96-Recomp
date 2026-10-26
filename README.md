@@ -172,8 +172,12 @@ know can be described with `SDL_GAMECONTROLLERCONFIG`.
 ## Verification
 
 The generator translated **1,093,471 instructions into 19,148 routines and
-31,213 dispatch entries** on both Windows and Linux. Details and logs are in
-`docs/TESTING.md`.
+31,213 dispatch entries** on both Windows and Linux. A fresh clone starts at
+**1,077,293 instructions / 30,595 entries**: the extra 605 entry points are
+runtime-only, found by the `profile` target from your own dump, and are not
+committed. Run `cmake --build build-windows --config Release --target
+profile` once and rebuild to reach the published count. Details and logs are
+in `docs/TESTING.md`.
 
 ```text
 # 20,000-frame soak: boot, coin, start, select, a full match
