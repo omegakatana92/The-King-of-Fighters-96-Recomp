@@ -21,11 +21,13 @@ Prebuilt packages are attached to the [v0.1.0 release](https://github.com/omegak
 
 | Platform | Asset |
 |---|---|
-| Windows x64 | `kof 96-Windows-x64.zip` (contains `kof 96.exe`, SDL2 and the VC++ runtime) |
-| Steam Deck / Linux x86_64 | `kof 96-SteamDeck-x86_64.AppImage` |
+| Windows x64 | `kof.96-Windows-x64.zip` (contains `kof 96.exe`, SDL2 and the VC++ runtime) |
+| Steam Deck / Linux x86_64 | `kof.96-SteamDeck-x86_64.AppImage` |
 
-Neither package contains ROMs or BIOS files. Put your unzipped ROM files in
-a `roms` folder next to the executable/AppImage.
+These are the exact release-asset names; GitHub replaced the space in the
+local `kof 96...` filenames with a dot. Neither package contains ROMs or BIOS
+files. Put your unzipped ROM files in a `roms` folder next to the
+executable/AppImage.
 
 ## Deliverables
 
