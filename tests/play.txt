@@ -1,0 +1,130 @@
+# The King of Fighters '96 gameplay soak.
+# Frame numbers are 59.19 Hz video frames from power-on.
+#
+# Timeline measured from the real BIOS boot:
+#   ~600   eyecatcher
+#   ~1350  title ("PUSH 1P BUTTON")
+#   ~4100  member select
+#   ~4800  order select
+#   ~5600  match start
+#
+# The first coin at 900 lands during the BIOS self-test and is ignored, so
+# insert it on the attract loop instead.
+1300 coin
+1500 start
+
+# Member select: confirm Kyo, Benimaru and Daimon (the defaults).
+4300 a
+4500 a
+4700 a
+
+# From the start of the match, sweep the pad and throw attacks so the
+# session reaches the character, projectile and hit-reaction code.
+5600 right
+5660 right+a
+5720 right+b
+5780 right+c
+5840 a
+5900 right+d
+5960 down
+6020 down+a
+6080 down+b
+6140 left
+6200 left+a
+6260 left+b
+6320 left+c
+6380 d
+6440 up
+6500 up+a
+6560 up+b
+6620 right
+6680 right+a
+6740 right+b
+6800 right+c
+6860 a
+6920 right+d
+6980 down
+7040 down+a
+7100 down+b
+7160 left
+7220 left+a
+7280 left+b
+7340 left+c
+7400 d
+7460 up
+7520 up+a
+7580 up+b
+7640 right
+7700 right+a
+7760 right+b
+7820 right+c
+7880 a
+7940 right+d
+8000 down
+8060 down+a
+8120 down+b
+8180 left
+8240 left+a
+8300 left+b
+8360 left+c
+8420 d
+8480 up
+8540 up+a
+8600 up+b
+8660 right
+8720 right+a
+8780 right+b
+8840 right+c
+8900 a
+8960 right+d
+9020 down
+9080 down+a
+9140 down+b
+9200 left
+9260 left+a
+9320 left+b
+9380 left+c
+9440 d
+9500 up
+9560 up+a
+9620 up+b
+9680 right
+9740 right+a
+9800 right+b
+9860 right+c
+9920 a
+9980 right+d
+10040 down
+10100 down+a
+10160 down+b
+10220 left
+10280 left+a
+10340 left+b
+10400 left+c
+10460 d
+10520 up
+10580 up+a
+10640 up+b
+10700 right
+10760 right+a
+10820 right+b
+10880 right+c
+10940 a
+11000 right+d
+11060 down
+11120 down+a
+11180 down+b
+11240 left
+11300 left+a
+11360 left+b
+11420 left+c
+11480 d
+11540 up
+11600 up+a
+11660 up+b
+11720 right
+11780 right+a
+11840 right+b
+11900 right+c
+11960 a
+12020 right+d

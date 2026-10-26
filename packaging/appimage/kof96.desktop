@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=The King of Fighters '96
+Comment=Native static recompilation of The King of Fighters '96 (Neo Geo)
+Exec=kof96
+Icon=kof96
+Categories=Game;
+Terminal=false

@@ -1,0 +1,33 @@
+#!/bin/sh
+# AppRun - start the recompiled KOF '96 player from inside the AppImage.
+#
+# The tool looks for ROM files in this order:
+#   1. an explicit --rom-path on the command line;
+#   2. a "roms" folder next to the AppImage;
+#   3. ~/Emulation/roms/kof96, ~/roms/kof96, ~/roms.
+# No ROM or BIOS data is inside the AppImage; supply your own dump.
+HERE=$(dirname "$(readlink -f "$0")")
+export LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+has_rom=0
+for a in "$@"; do
+    [ "$a" = "--rom-path" ] && has_rom=1
+done
+if [ "$has_rom" = 0 ] && [ -n "${APPIMAGE:-}" ]; then
+    for d in "$(dirname "$APPIMAGE")/roms" \
+             "$(dirname "$APPIMAGE")/roms/kof96" \
+             "$HOME/Emulation/roms/kof96" \
+             "$HOME/roms/kof96" "$HOME/roms"; do
+        if [ -d "$d" ]; then set -- --rom-path "$d" "$@"; has_rom=1; break; fi
+    done
+fi
+
+# Steam Deck / Gaming Mode wants a fullscreen game. Keep --headless, an
+# explicit --fullscreen or an explicit --scale from being overridden.
+add_fs=1
+for a in "$@"; do
+    case "$a" in --headless|--fullscreen|--scale) add_fs=0;; esac
+done
+[ "$add_fs" = 1 ] && set -- --fullscreen "$@"
+
+exec "$HERE/usr/bin/kof96" "$@"

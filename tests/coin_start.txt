@@ -1,0 +1,13 @@
+# Short credit/start plus the first match, for a quick --verify run.
+# Same timings as tests/play.txt, but the match only needs to begin.
+1300 coin
+1500 start
+4300 a
+4500 a
+4700 a
+5600 right
+5660 right+a
+5720 right+b
+5780 right+c
+5840 a
+5900 right+d
