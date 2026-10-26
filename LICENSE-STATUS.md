@@ -8,7 +8,7 @@ The full text is in `LICENSE`.
 Status: **confirmed by the project owner on 2026-10-26** for this title. No
 other PolyForm variant applies.
 
-Required Notice: Copyright (c) 2026 the KOF '96 Recompilation authors.
+Required Notice: Copyright (c) 2026 omegakatana92.
 
 What this license does **not** cover
 ------------------------------------

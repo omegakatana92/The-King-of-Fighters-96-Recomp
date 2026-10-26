@@ -2,6 +2,8 @@
 
 ## Project code
 
+Copyright (c) 2026 omegakatana92.
+
 `LICENSE` (PolyForm Noncommercial License 1.0.0, confirmed 2026-10-26)
 covers the code written for this port: `src/`, `tests/`, `scripts/`,
 `packaging/`, `docs/` and the build files. See `LICENSE-STATUS.md` for scope.

@@ -245,7 +245,8 @@ dist/steamdeck/             AppImage + README (no ROMs)
 
 The project's own source is licensed under the **PolyForm Noncommercial
 License 1.0.0** (see `LICENSE`; confirmed by the project owner on
-2026-10-26, scope in `LICENSE-STATUS.md`). `neogeorecomp/` remains MIT;
+2026-10-26, scope in `LICENSE-STATUS.md`). Copyright (c) 2026
+omegakatana92. `neogeorecomp/` remains MIT;
 Musashi and z80 are MIT, ymfm is BSD-3-Clause, SDL2 is zlib. Full
 attribution is in `THIRD_PARTY_NOTICES.md` and in the preserved
 `neogeorecomp/LICENSE`, `NOTICE` and `LICENSES/` files.
