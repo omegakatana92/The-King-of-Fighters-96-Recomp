@@ -136,18 +136,52 @@ is not a translated-instruction mismatch: `--verify` reports none.
 
 ## 6. Audio
 
+The KOF '96 audio failure was caused by the M1 bank mask truncating music
+banks above 64 KB (see `docs/runtime-changes.md`). Before the fix, a
+12,000-frame capture was silent from about 61 s to 88 s, with only isolated
+ADPCM blips, exactly matching the reported symptom. A MAME 0.242 capture of
+the same input sequence has continuous music through that section.
+
+After the fix:
+
 ```
-build-windows\Release\"kof 96.exe" --headless --rom-path roms \
-    --frames 20000 --input tests/play.txt --wav soak.wav
+# 20,000 frames, fixed RTC
+NG_RTC=1996-01-01 ./build-linux/"kof 96" --headless --rom-path roms \
+    --frames 20000 --input tests/play.txt --wav fixed.wav
 ```
 
-Result: 337.9 s, 55,555 Hz stereo, 16-bit. Overall peak 23,080, mean RMS
-2,343; 5-second windows are non-silent throughout the match (for example
-RMS 4,344 at 130 s, RMS 5,889 at 245 s). The M1 driver is running and
-programming FM/SSG/ADPCM. A 67.6 s Linux capture peaks at 16,476, RMS 997.
-**Subjective quality was not auditioned.**
+337.9 s, 55,555 Hz stereo, peak 26,937. Every 1-second window from 56 s
+(character select) through 200 s (match) is above 100 RMS; the minimum in
+56-90 s is 1,780, 90-130 s is 746, and 130-200 s is 1,696. The later short
+gaps at ~208/217/239 s are the normal round/continue transitions; the
+280-298 s gap is the game-over -> title transition, after which the attract
+match music resumes.
 
-## 7. Windows window
+Native and `--interp` captures have the same 56-200 s continuity, and the
+Windows build matches the Linux RMS values. Subjective quality (mix, volume,
+every track) was not auditioned.
+
+## 7. Audio regression test
+
+`tests/check_audio.py` checks the 56-90, 90-130 and 130-200 s windows for
+silence. The `audio-check` CMake target runs a 12,000-frame capture and the
+check:
+
+```
+cmake --build build-linux --target audio-check
+```
+
+It fails the pre-fix WAV (silent windows at 61-88 s) and passes the fixed
+one:
+
+```
+ 56- 90 s: min RMS  1780.2  mean RMS  2449.0
+ 90-130 s: min RMS   746.5  mean RMS  3608.9
+130-200 s: min RMS  1696.1  mean RMS  3513.7
+PASS: continuous audio through character select and the match (peak 26937)
+```
+
+## 8. Windows window
 
 ```
 "kof 96.exe" --rom-path roms --frames 240 --scale 2      -> exit 0
@@ -158,7 +192,7 @@ Both opened the SDL2 window, rendered frames and exited cleanly. The
 `--fullscreen` path letterboxes the 4:3 Neo Geo image inside the desktop
 resolution.
 
-## 8. Linux x86_64
+## 9. Linux x86_64
 
 Built with gcc 11.4 / CMake 4.4.4 on Ubuntu 22.04 under WSL2, generated
 files at `-O1`.
@@ -179,7 +213,7 @@ The Linux fixed-RTC frame-19,999 screenshot is byte-identical to the
 Windows one, and the block/instruction counts match exactly. `ldd` shows
 SDL2 plus normal system libraries; the AppImage bundles SDL2.
 
-## 9. AppImage
+## 10. AppImage
 
 ```bash
 JOBS=4 ./packaging/appimage/build-appimage.sh "$PWD/roms"
@@ -205,7 +239,7 @@ Verified after building:
 Physical Steam Deck LCD/OLED, Steam Input and Gaming Mode were not
 available. See `dist/steamdeck/README.txt`.
 
-## 10. Not tested
+## 11. Not tested
 
 * Physical Steam Deck hardware, Gaming Mode, Steam Input, Deck speakers.
 * Physical Xbox/Steam controller (SDL mapping inherited from the toolkit).

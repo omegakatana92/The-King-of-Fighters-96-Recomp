@@ -59,7 +59,7 @@ the cart kept bank 0 selected, so this fallback never cost a native block.
 | Standard `$2FFFF0` PROGBK1 bank select | yes |
 | 32 MB CHA256 graphics (odd/even pairs) | yes |
 | 128 KB S ROM fixed layer | yes |
-| 128 KB M1, Z80 banking, NMI/reply latches | yes |
+| 128 KB M1, Z80 banking, M1 bank mask, NMI/reply latches | yes (bank mask fixed in v0.1.1) |
 | 10 MB ADPCM-A samples, YM2610 FM/SSG/ADPCM | yes |
 | MVS BIOS boot, RAM/checksum tests, coin/start | yes |
 | uPD4990A calendar | yes (host time; `NG_RTC` freezes it for tests) |
@@ -88,7 +88,8 @@ menu were not driven by the scripts.
 ## Unsupported / limitations
 
 * No memory card, AES/PAL timing or link-up support.
-* Audio was checked at signal level only.
+* Audio continuity and signal level were checked; subjective mix/volume was
+  not auditioned.
 * Physical Steam Deck and physical controllers were not available.
 * Release binaries embed translated ROM code and are provided for use with
   legally owned ROMs; no rights to SNK's game data are granted.

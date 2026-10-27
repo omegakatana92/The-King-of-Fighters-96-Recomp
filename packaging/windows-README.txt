@@ -47,6 +47,8 @@ Insert a coin before Start does anything (MVS behaviour).
 
 Notes
 -----
+* v0.1.1 fixes the M1 bank-mask bug that silenced music at character
+  selection; music is continuous through select and the match.
 * Built from the plain MAME "kof96" set (CRC/SHA1 verified). No decryption
   or protection patching is needed.
 * Verified with the MVS sp-s2.sp1 BIOS. Other BIOS files may work but were

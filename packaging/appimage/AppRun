@@ -14,7 +14,9 @@ for a in "$@"; do
     [ "$a" = "--rom-path" ] && has_rom=1
 done
 if [ "$has_rom" = 0 ] && [ -n "${APPIMAGE:-}" ]; then
-    for d in "$(dirname "$APPIMAGE")/roms" \
+    for d in "$HOME/.local/share/kof96/roms-clean" \
+             "$HOME/.local/share/kof96/roms" \
+             "$(dirname "$APPIMAGE")/roms" \
              "$(dirname "$APPIMAGE")/roms/kof96" \
              "$HOME/Emulation/roms/kof96" \
              "$HOME/roms/kof96" "$HOME/roms"; do

@@ -17,12 +17,12 @@ fallback, used while bringing the port up and as the `--verify` oracle.
 
 ## Download
 
-Prebuilt packages are attached to the [v0.1.0 release](https://github.com/omegakatana92/The-King-of-Fighters-96-Recomp/releases/tag/v0.1.0):
+Prebuilt packages are attached to the [v0.1.1 release](https://github.com/omegakatana92/The-King-of-Fighters-96-Recomp/releases/tag/v0.1.1):
 
 | Platform | Asset |
 |---|---|
 | Windows x64 | `kof.96-Windows-x64.zip` (contains `kof 96.exe`, SDL2 and the VC++ runtime) |
-| Steam Deck / Linux x86_64 | `kof.96-SteamDeck-x86_64.AppImage` |
+| Steam Deck / Linux x86_64 | `KOF96-AudioFixed-x86_64.AppImage` |
 
 These are the exact release-asset names; GitHub replaced the space in the
 local `kof 96...` filenames with a dot. Neither package contains ROMs or BIOS
@@ -34,16 +34,17 @@ executable/AppImage.
 | Platform | Artifact |
 |---|---|
 | Windows x64 | `dist/windows/kof 96-Windows-x64/kof 96.exe` (+ `SDL2.dll`) |
-| Steam Deck / Linux x86_64 | `dist/steamdeck/kof 96-SteamDeck-x86_64.AppImage` |
+| Steam Deck / Linux x86_64 | `dist/steamdeck/KOF96-AudioFixed-x86_64.AppImage` |
 
 The Windows package contains no ROMs. The AppImage contains no ROMs. Put
 your unzipped ROM files in a `roms` folder next to the executable/AppImage.
 
 ## Status
 
-**v0.1.0. Boots through the real BIOS, reaches gameplay, runs 100% native
+**v0.1.1. Boots through the real BIOS, reaches gameplay, runs 100% native
 on the measured sessions, and the native code matches Musashi with 0
-mismatches.**
+mismatches. v0.1.1 fixes the M1 bank-mask bug that silenced the music at
+character selection.**
 
 | Area | State |
 |---|---|
@@ -51,7 +52,7 @@ mismatches.**
 | Input / credits | Coin, Start, directions and A/B/C/D tested by scripted sessions |
 | Gameplay | Member select, order select, a full 3-on-3 match against the King team, continue screen and the next stage |
 | Graphics | Sprites, backgrounds, fix layer, palettes, HUD, animation |
-| Audio | The real M1 driver runs and programs the YM2610; 337.9 s capture is non-silent (peak 23,080, mean RMS 2,343 at 55,555 Hz stereo). Not auditioned subjectively |
+| Audio | Continuous music through character select and the match after the v0.1.1 M1 bank-mask fix; 337.9 s capture is non-silent (peak 26,937 at 55,555 Hz stereo), every 1 s window 56-200 s above 100 RMS. Not auditioned subjectively |
 | Native coverage | **100.00%** of executed 68k instructions over a 20,000-frame scripted session (377,468,486 native, 0 interpreted); five fixed RTC dates and host time all reached 0 interpreted |
 | `--verify` | **4,102,741 blocks, 0 mismatches**, 100% native over 7,000 frames of coin/start/select/match |
 | Windows | Release x64 built with MSVC 19.51 (Visual Studio 2026) + SDL2 2.32.10; windowed and `--fullscreen` launches exit 0 |
@@ -135,7 +136,8 @@ JOBS=4 ./scripts/build-linux.sh "$PWD/roms"
 JOBS=4 ./packaging/appimage/build-appimage.sh "$PWD/roms"
 ```
 
-Output: `dist/steamdeck/kof 96-SteamDeck-x86_64.AppImage`. The AppRun script
+Output: `dist/steamdeck/KOF96-AudioFixed-x86_64.AppImage` (set
+`KOF96_APPIMAGE_NAME` to change the file name). The AppRun script
 finds a `roms` folder next to the AppImage (or the usual Deck locations),
 bundles SDL2, and adds `--fullscreen` unless told otherwise. The image is
 4:3 pillarboxed on the Deck's 16:10 panel.
@@ -201,8 +203,9 @@ fixed-RTC 19,999-frame screenshot is byte-identical to the Windows one.
 ## Known limitations
 
 * **Subjective audio quality was not auditioned.** The Z80 driver runs, the
-  YM2610 is programmed and the WAV capture is non-silent, but mix/volume
-  balance and every track were not checked by ear.
+  YM2610 is programmed, the 56-200 s windows are continuous, and the
+  automated regression check passes, but mix/volume balance and every track
+  were not checked by ear.
 * **Physical Steam Deck hardware was not available.** The AppImage was built
   and launched under WSL2 Ubuntu 22.04 (headless, and windowed/fullscreen at
   1280x800 on an Xvfb virtual display). SteamOS 3 uses a compatible glibc
@@ -236,6 +239,7 @@ src/recomp_main.c           generator (ng_recomp_main)
 neogeorecomp/               toolkit v0.2.0 (MIT) + generic fixes
 tests/play.txt              20,000-frame coin/start/select/match session
 tests/coin_start.txt        shorter session for --verify
+tests/check_audio.py        audio continuity regression check (`audio-check`)
 scripts/build-linux.sh      Linux Release build
 scripts/build-windows.ps1   Windows Release build
 packaging/appimage/         AppImage build, AppRun, desktop file, icon, README

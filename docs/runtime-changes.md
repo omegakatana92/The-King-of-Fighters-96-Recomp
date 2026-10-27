@@ -49,16 +49,53 @@ RAM and battery-backed RAM keep their contents. The reset asserts IRQ3 like
 the BIOS expects. This is the generic MVS behaviour and several games use a
 watchdog reset as a protection check during backup-RAM initialisation.
 
-## 4. YM2610 M1 bank mask (`src/audio.c`)
+## 4. M1 bank mask from the M1 file size (`src/audio.c`)
 
-The Z80 bank ports address `0x10000 + ((bank << shift) & mask)` in the MAME
-audio region. Because the region's `0x10000` base is the start of the M1
-file (`ROM_RELOAD`), the file offset is the masked value alone. The old code
-added a second `0x10000`, which on 512 KB M1 carts read `$FF` padding as
-sample tables. KOF '96 has a 128 KB M1 where the difference is inert, but the
-fix is generic. `NG_AUDIO_TRACE=1` prints command/reply and bank diagnostics.
+This is the KOF '96 audio fix. MAME's `neogeo_base_state::init_audio()`
+builds each Z80 bank entry as
 
-## 5. Fullscreen and 4:3 presentation (`src/window_sdl.c`,
+```
+bank_address = 0x10000 + ((bank << (11 + window)) & address_mask);
+```
+
+in the audio region. `ROM_RELOAD` places the first byte of the M1 file at
+region offset `0x10000`, so the **file** offset is the masked value alone.
+`address_mask` comes from the region length (`M1 size + 0x10000`):
+
+```
+address_mask = (region_len - 0x10000 - 1) & 0x3FFFF
+             = (M1 size - 1) & 0x3FFFF      (for files up to 512 KB)
+```
+
+so a 64 KB M1 masks with `0xFFFF`, a 128 KB M1 with `0x1FFFF`, and 256/512 KB
+M1s with `0x3FFFF`. The old code used `(size - 0x10000 - 1)`, which gives
+`0xFFFF` for a 128 KB M1.
+
+KOF '96's driver selects M1 banks `0x18000`–`0x1F000` when it loads its music
+data at character selection. With `0xFFFF`, those offsets were truncated to
+`0x8000`–`0xF000`, so the Z80 read unrelated bytes (code/data) and the BGM
+went silent. ADPCM sound effects already triggered by the 68000 kept playing,
+which exactly matches the reported symptom. The same failure occurs in
+`--interp` mode because this code is shared. The fix derives the mask from
+the M1 file size, as MAME does, and is generic for all M1 sizes.
+
+Evidence: `NG_AUDIO_TRACE=1` showed banks `1F000/1E000/1C000/18000` at the
+silent section; a MAME 0.242 capture of the same input sequence has
+continuous music there. After the fix the WAV is continuous from 56 s
+(character select) through 200 s (match), and the new `audio-check` target
+guards it. The old "second 0x10000" bug for 512 KB M1s is also covered by the
+same formula.
+
+## 5. Frame-boundary Z80 sync (`src/audio.c`)
+
+`audio_take_samples()` now calls `audio_sync()` before generating samples.
+The Z80 previously advanced only when the 68000 touched the sound latches,
+so a game that stopped polling could starve the sound CPU and its YM2610
+timers. Syncing once per frame keeps the Z80 in step with `ng_cycles`
+regardless of 68k polling. This is generic; it does not alter the 68000
+timeline or the recompiled code.
+
+## 6. Fullscreen and 4:3 presentation (`src/window_sdl.c`,
 `src/platform.c`, `src/neogeo.c`)
 
 `--fullscreen` creates a desktop-fullscreen window, and F11 toggles it. The
@@ -66,7 +103,7 @@ fix is generic. `NG_AUDIO_TRACE=1` prints command/reply and bank diagnostics.
 (1280x800 -> 1066x800), never stretched to 16:10. This is required for a
 sensible Steam Deck image.
 
-## 6. Optional cart features (not used by KOF '96)
+## 7. Optional cart features (not used by KOF '96)
 
 These are configuration fields, not hacks, and are zero/NULL for this game:
 
@@ -79,7 +116,7 @@ These are configuration fields, not hacks, and are zero/NULL for this game:
 
 `docs/hardware-notes.md` describes the underlying behaviour.
 
-## 7. Optional fixed calendar for reproducible tests (`src/io.c`)
+## 8. Optional fixed calendar for reproducible tests (`src/io.c`)
 
 The uPD4990A calendar keeps following the host's local time by default, which
 is what hardware does. `NG_RTC="YYYY-MM-DD HH:MM:SS"` freezes it for a run.

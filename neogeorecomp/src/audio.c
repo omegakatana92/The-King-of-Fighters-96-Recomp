@@ -38,6 +38,7 @@ static int64_t s_z80_clock;         /* Z80 clocks executed, tracks ng_cycles / 3
 static int s_trace;                 /* NG_AUDIO_TRACE=1 diagnostic */
 static long long s_trace_last_frame = -1;
 static int s_trace_cmds;
+static long long s_ym_writes, s_key_events, s_irq38, s_nmi66;
 
 /* Synthesis (ym2610.cpp): one stereo sample per 72 Z80 clocks (8 MHz / 144). */
 void    ym2610_init(const uint8_t *const *vroms, const size_t *sizes, int n);
@@ -99,6 +100,13 @@ static void ym_write(int port, uint8_t v) {
     if (!(port & 1)) { s_ym.addr[part] = v; return; }
     uint8_t r = s_ym.addr[part];
     s_ym.regs[part][r] = v;
+    if (part == 0) {
+        s_ym_writes++;
+        if (r == 0x28) s_key_events++;
+        if (s_trace && r == 0x27)
+            fprintf(stderr, "[ym] f=%lld timer ctrl %02X ctrl=%02X status=%02X\n",
+                    (long long)(ng_cycles / NG_CLOCKS_PER_FRAME), v, s_ym.ctrl, s_ym.status);
+    }
     if (part == 0 && r == 0x27) {
         if ((v & 1) && !(s_ym.ctrl & 1)) s_ym.ta_deadline = s_z80_clock + ym_ta_period();
         if ((v & 2) && !(s_ym.ctrl & 2)) s_ym.tb_deadline = s_z80_clock + ym_tb_period();
@@ -130,12 +138,17 @@ static uint8_t z_read(void *u, uint16_t a) {
     size_t size = rom_size();
     if (a < 0x8000) return r[a % size];
     if (a >= 0xF800) return s_ram[a & 0x7FF];
-    /* MAME's init_audio(): the bank entry is at
-     * 0x10000 + ((bank << (11 + window)) & mask) *in the region*.  The
-     * region's 0x10000 base is the start of the M1 file (ROM_RELOAD), so the
-     * file offset is the masked value alone -- not masked + 0x10000. */
+    /* MAME's init_audio(): each bank entry is
+     * 0x10000 + ((bank << (11 + window)) & address_mask) in the audio
+     * region. ROM_RELOAD puts the first byte of the M1 file at region
+     * offset 0x10000, so the file offset is the masked value alone.
+     * address_mask comes from the region length, which is
+     * (M1 size + 0x10000); for files up to 512 KB that reduces to
+     * (M1 size - 1) & 0x3FFFF. Masking a 128 KB M1 with 0xFFFF would
+     * truncate banks 0x10000-0x1FFFF, which several drivers use for
+     * music data. */
     static const uint32_t win_mask[4] = {0x7FF, 0xFFF, 0x1FFF, 0x3FFF};
-    uint32_t reg_mask = size > 0x10000 ? ((uint32_t)(size - 0x10000 - 1) & 0x3FFFF) : 0;
+    uint32_t reg_mask = size ? (((uint32_t)size - 1u) & 0x3FFFFu) : 0;
     uint32_t off;
     if (a >= 0xF000) off = (s_bank[0] & reg_mask) + (a & win_mask[0]);
     else if (a >= 0xE000) off = (s_bank[1] & reg_mask) + (a & win_mask[1]);
@@ -231,8 +244,11 @@ void audio_sync(void) {
     int64_t target = ng_cycles / 3;
     while (s_z80_clock < target) {
         unsigned long before = s_z.cyc;
+        uint16_t pc0 = s_z.pc;
         s_z.int_pending = (s_ym.status & 3) != 0;
         z80_step(&s_z);
+        if (s_z.pc == 0x38 && pc0 != 0x38) s_irq38++;
+        if (s_z.pc == 0x66 && pc0 != 0x66) s_nmi66++;
         s_z80_clock += (int64_t)(s_z.cyc - before);
         ym_update_timers();
     }
@@ -268,15 +284,22 @@ void audio_select_bios_rom(int bios) {
 }
 
 size_t audio_take_samples(int16_t *out, size_t max_frames) {
+    /* Keep the Z80 in step with the 68000 even when the game does not poll
+     * the sound latches for a while. The YM2610 timers and the driver's
+     * sequencer must keep running; advancing the Z80 only on 68k port
+     * accesses can starve them. */
+    audio_sync();
     generate_to_now();
     if (s_trace) {
         long long f = (long long)(ng_cycles / NG_CLOCKS_PER_FRAME);
         if (f != s_trace_last_frame && (f % 60) == 0) {
             s_trace_last_frame = f;
             fprintf(stderr, "[audio] f=%lld pc=%04X bios=%d banks=%05X/%05X/%05X/%05X "
-                    "cmd=%02X rpy=%02X ring=%zu n=%lld\n", f, s_z.pc, s_use_bios_rom,
+                    "cmd=%02X rpy=%02X ring=%zu n=%lld ym=%02X ctrl=%02X ip=%d "
+                    "w=%lld key=%lld irq=%lld nmi=%lld\n", f, s_z.pc, s_use_bios_rom,
                     s_bank[0], s_bank[1], s_bank[2], s_bank[3], s_cmd, s_reply,
-                    s_ring_count, (long long)s_samples_done);
+                    s_ring_count, (long long)s_samples_done, s_ym.status, s_ym.ctrl, s_z.int_pending,
+                    s_ym_writes, s_key_events, s_irq38, s_nmi66);
         }
     }
     size_t n = s_ring_count < max_frames ? s_ring_count : max_frames;

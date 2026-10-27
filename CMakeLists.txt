@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(kof96 VERSION 0.1.0 LANGUAGES C CXX)
+project(kof96 VERSION 0.1.1 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -85,6 +85,22 @@ endif()
 if(MSVC)
     target_compile_definitions(kof96 PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(kof96_recomp PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
+# Optional regression test: capture a scripted session and check that the
+# sound driver keeps producing music through character selection and the
+# match. Requires Python 3 and the user's ROMs.
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(KOF96_ROM_DIR AND Python3_Interpreter_FOUND)
+    add_custom_target(audio-check
+        COMMAND ${CMAKE_COMMAND} -E env "NG_RTC=1996-01-01"
+                $<TARGET_FILE:kof96> --headless --rom-path ${KOF96_ROM_DIR}
+                --frames 12000 --input ${CMAKE_CURRENT_SOURCE_DIR}/tests/play.txt
+                --wav ${CMAKE_BINARY_DIR}/audio-check.wav
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/check_audio.py
+                ${CMAKE_BINARY_DIR}/audio-check.wav
+        DEPENDS kof96
+        COMMENT "Checking KOF '96 audio through character select and the match")
 endif()
 
 # Ship the SDL2 DLL (when the window is built) next to the executable.

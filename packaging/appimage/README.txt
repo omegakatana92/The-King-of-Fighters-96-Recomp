@@ -8,12 +8,14 @@ the real MVS BIOS. It is not an emulator wrapper.
 Quick start
 -----------
 1. Copy this AppImage and your "roms" folder anywhere on the Deck.
-   The players look for ROMs in these places:
-     - a "roms" folder next to the AppImage (recommended)
+   The players look for ROMs in these places, in order:
+     - ~/.local/share/kof96/roms-clean (the standard location)
+     - ~/.local/share/kof96/roms
+     - a "roms" folder next to the AppImage
      - ~/Emulation/roms/kof96
      - ~/roms/kof96
      - ~/roms
-2. chmod +x "kof 96-SteamDeck-x86_64.AppImage"
+2. chmod +x "KOF96-AudioFixed-x86_64.AppImage"
 3. Desktop Mode: double-click it.
    Gaming Mode: add it as a non-Steam game and launch it.
 
@@ -58,6 +60,12 @@ attract mode, coin/start, member select, a full match, --verify with 0
 mismatches, 100% native instructions over a 20,000-frame scripted session,
 and the AppImage launched windowed and fullscreen at 1280x800 on an Xvfb
 virtual display (SDL2 X11 path), exiting 0.
+
+This is the audio-fixed build (v0.1.1). The previous build went silent from
+character selection; the M1 bank mask truncated music banks above 64 KB. The
+fix is in the bundled binary and the source tree. A 20,000-frame capture has
+continuous music from 56 s through 200 s, and native and interpreter modes
+match.
 
 Physical Steam Deck LCD/OLED hardware, Steam Input and Gaming Mode were not
 available in this environment, so those are not claimed as tested. SteamOS 3

@@ -62,6 +62,16 @@ SSG and ADPCM-A at the chip rate. KOF '96's M1 is 128 KB, within the plain
 128 KB audio region; the generic M1 bank-mask fix is inert here but is
 described in `docs/runtime-changes.md`.
 
+## M1 bank offsets above 64 KB
+
+The Z80 bank windows select offsets in the M1 image; the 128 KB KOF '96 M1
+uses offsets `0x18000`–`0x1F000` for music data at character selection. The
+mask must come from the M1 size (`(size - 1) & 0x3FFFF`, matching MAME's
+`address_mask`), not from `size - 0x10000`. The latter is `0xFFFF` for a
+128 KB M1 and truncates every bank above 64 KB, so the driver reads unrelated
+bytes and the BGM goes silent while already-triggered ADPCM effects continue.
+`docs/runtime-changes.md` has the full derivation and the regression check.
+
 ## Calendar and randomness
 
 The board's uPD4990A real-time clock is driven from the host's local time, as
