@@ -138,9 +138,12 @@ JOBS=4 ./packaging/appimage/build-appimage.sh "$PWD/roms"
 
 Output: `dist/steamdeck/KOF96-AudioFixed-x86_64.AppImage` (set
 `KOF96_APPIMAGE_NAME` to change the file name). The AppRun script
-finds a `roms` folder next to the AppImage (or the usual Deck locations),
-bundles SDL2, and adds `--fullscreen` unless told otherwise. The image is
-4:3 pillarboxed on the Deck's 16:10 panel.
+looks for ROMs in `~/.local/share/kof96/roms-clean`,
+`~/.local/share/kof96/roms`, a `roms` folder next to the AppImage, and the
+usual Deck locations; if the selected folder has no BIOS it uses
+`~/.local/share/kof96/roms` as `--bios-path`. It bundles SDL2 and adds
+`--fullscreen` unless told otherwise. The image is 4:3 pillarboxed on the
+Deck's 16:10 panel.
 
 ## Run
 

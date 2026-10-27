@@ -10,6 +10,7 @@ HERE=$(dirname "$(readlink -f "$0")")
 export LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 has_rom=0
+rom_dir=""
 for a in "$@"; do
     [ "$a" = "--rom-path" ] && has_rom=1
 done
@@ -20,7 +21,24 @@ if [ "$has_rom" = 0 ] && [ -n "${APPIMAGE:-}" ]; then
              "$(dirname "$APPIMAGE")/roms/kof96" \
              "$HOME/Emulation/roms/kof96" \
              "$HOME/roms/kof96" "$HOME/roms"; do
-        if [ -d "$d" ]; then set -- --rom-path "$d" "$@"; has_rom=1; break; fi
+        if [ -d "$d" ]; then
+            rom_dir="$d"
+            set -- --rom-path "$d" "$@"
+            has_rom=1
+            break
+        fi
+    done
+fi
+
+# The game and BIOS files are sometimes split between roms-clean and roms.
+# If the selected directory has no BIOS, fall back to the original directory.
+if [ -n "$rom_dir" ] && [ ! -f "$rom_dir/sp-s2.sp1" ]; then
+    for b in "$HOME/.local/share/kof96/roms" \
+             "$HOME/.local/share/kof96/roms-clean"; do
+        if [ -f "$b/sp-s2.sp1" ]; then
+            set -- --bios-path "$b" "$@"
+            break
+        fi
     done
 fi
 

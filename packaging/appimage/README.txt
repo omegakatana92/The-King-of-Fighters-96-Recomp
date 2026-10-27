@@ -20,7 +20,9 @@ Quick start
    Gaming Mode: add it as a non-Steam game and launch it.
 
 The AppRun script adds --fullscreen automatically. Pass --scale 2 or
---headless to override; F11 toggles fullscreen and Esc quits.
+--headless to override; F11 toggles fullscreen and Esc quits. If the chosen
+ROM folder has no BIOS files, AppRun uses ~/.local/share/kof96/roms as
+--bios-path automatically.
 
 ROMs are NOT included
 ---------------------

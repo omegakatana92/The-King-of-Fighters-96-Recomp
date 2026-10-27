@@ -120,8 +120,11 @@ dist/steamdeck/kof 96-SteamDeck-x86_64.AppImage
 The AppRun script:
 
 * adds `usr/lib` to `LD_LIBRARY_PATH`;
-* finds a `roms` folder beside the AppImage, or in `~/Emulation/roms/kof96`,
-  `~/roms/kof96`, `~/roms`;
+* finds ROMs in `~/.local/share/kof96/roms-clean`,
+  `~/.local/share/kof96/roms`, a `roms` folder beside the AppImage,
+  `~/Emulation/roms/kof96`, `~/roms/kof96` or `~/roms`;
+* if the selected folder has no BIOS, uses
+  `~/.local/share/kof96/roms` as `--bios-path`;
 * adds `--fullscreen` unless `--headless`, `--scale` or `--fullscreen` is
   already present.
 
